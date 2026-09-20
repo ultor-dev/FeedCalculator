@@ -1,0 +1,12 @@
+[
+  {
+    "species": "Корова",
+    "daily_rate": 12.0,
+    "count": 1
+  },
+  {
+    "species": "Пингвин",
+    "daily_rate": 133.0,
+    "count": 1
+  }
+]
