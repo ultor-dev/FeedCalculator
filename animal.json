@@ -1,12 +1,12 @@
 [
   {
-    "species": "Морской огурец",
+    "species": "Морская крыса",
     "daily_rate": 1.0,
     "count": 100
   },
   {
-    "species": "Морская крыса",
-    "daily_rate": 1.0,
-    "count": 1
+    "species": "Морской гитхабоносец",
+    "daily_rate": 10.0,
+    "count": 30
   }
 ]
