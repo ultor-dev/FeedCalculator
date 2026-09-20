@@ -37,12 +37,23 @@ def input_yes_no(prompt: str) -> bool:
     """Запрашивает ответ да/нет с проверкой корректности ввода."""
     while True:
         answer = input(prompt).strip().lower()
-        if answer in ("д", "да"):
+        if answer in ("д", "да", "y", "yes", "оа", "ооба"):
             return True
-        elif answer in ("н", "нет"):
+        elif answer in ("н", "нет", "n", "no", "ж", "жок"):
             return False
         else:
             print("Ошибка: введите 'д' (да) или 'н' (нет).")
+
+def show_menu() -> str:
+    """Показывает главное меню и возвращает выбор пользователя."""
+    print("Меню")
+    print("1. Добавить виды животных и рассчитать корма")
+    print("2. Выход")
+    while True:
+        choice = input("Выберите пункт меню (1-2): ").strip()
+        if choice in ("1", "2"):
+            return choice
+        print("Ошибка: введите 1 или 2.")
 
 def input_animals() -> list[Animal]:
     """Запрашивает у пользователя данные по видам животных."""
@@ -81,8 +92,12 @@ def load_animals(filename: str = DATA_FILE) -> list[Animal]:
     return animals
 
 
-def save_report(result: dict[str, float], days: int, filename: str = "feed_report.txt") -> None:
+def save_report(result: dict[str, float], days: int) -> None:
     """Сохраняет итоговый отчет по кормам в текстовый файл."""
+    filename=input("Введите имя файла для отчета (например, report.txt): ").strip()
+    if not filename:
+        filename = "feed_report.txt"
+
     total_all = sum(result.values())
     with open(filename, "w", encoding="utf-8") as f:
         f.write(f"Потребность в кормах за {days} дн.\n")
@@ -121,32 +136,37 @@ def main():
     print("Расчет потребности в кормах на ферме\n")
 
     animals: list[Animal] = []
- 
-    # Предлагаем загрузить ранее сохраненные виды животных
+
+    # Загрузка сохраненных данных один раз при старте
     if os.path.exists(DATA_FILE):
         if input_yes_no(f"Найден файл '{DATA_FILE}'. Загрузить сохраненные данные? (д/н): "):
             animals = load_animals()
- 
-    # Предлагаем добавить новые виды животных
-    if input_yes_no("Добавить новые виды животных? (д/н): ") or not animals:
-        animals.extend(input_animals())
- 
-    if not animals:
-        print("Нет данных о животных. Завершение программы.")
-        return
- 
-    # Предлагаем сохранить обновленный список
-    if input_yes_no("\nСохранить список животных в файл? (д/н): "):
-        save_animals(animals)
- 
-    days = input_int("\nНа сколько дней рассчитать корма? ")
- 
-    result = calculate_total_feed(animals, days)
-    print_results(result, days)
- 
-    # Предлагаем сохранить отчет
-    if input_yes_no("\nСохранить отчет в файл? (д/н): "):
-        save_report(result, days)
+
+    while True:
+        choice = show_menu()
+
+        if choice == "2":
+            print("\nПрограмма завершена.")
+            break
+
+        # choice == "1"
+        if input_yes_no("\nДобавить новые виды животных? (д/н): ") or not animals:
+            animals.extend(input_animals())
+
+        if not animals:
+            print("Нет данных о животных.")
+            continue
+
+        if input_yes_no("\nСохранить список животных в файл? (д/н): "):
+            save_animals(animals)
+
+        days = input_int("\nНа сколько дней рассчитать корма? ")
+
+        result = calculate_total_feed(animals, days)
+        print_results(result, days)
+
+        if input_yes_no("\nСохранить отчет в файл? (д/н): "):
+            save_report(result, days)
 
 
 if __name__ == "__main__":
