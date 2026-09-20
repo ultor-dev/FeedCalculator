@@ -11,7 +11,7 @@ class Animal:
     count: int          # общее поголовье
 
 
-def input_int(prompt: str, min_value: int = 1) -> int:
+def inputInt(prompt: str, min_value: int = 1) -> int:
     """Запрашивает целое число с проверкой корректности ввода."""
     while True:
         try:
@@ -24,7 +24,7 @@ def input_int(prompt: str, min_value: int = 1) -> int:
             print("Ошибка: введите целое число.")
 
 
-def input_float(prompt: str, min_value: float = 0.0) -> float:
+def inputFloat(prompt: str, min_value: float = 0.0) -> float:
     """Запрашивает вещественное число с проверкой корректности ввода."""
     while True:
         try:
@@ -37,7 +37,7 @@ def input_float(prompt: str, min_value: float = 0.0) -> float:
             print("Ошибка: введите число (можно с точкой, например 2.5).")
 
 
-def input_yes_no(prompt: str) -> bool:
+def inputYesNo(prompt: str) -> bool:
     """Запрашивает ответ да/нет с проверкой корректности ввода."""
     while True:
         answer = input(prompt).strip().lower()
@@ -49,7 +49,7 @@ def input_yes_no(prompt: str) -> bool:
             print("Ошибка: введите 'д'/'да'/'ооба' (да) или 'н'/'нет'/'жок' (нет).")
 
 
-def show_menu() -> str:
+def showMenu() -> str:
     """Показывает главное меню и возвращает выбор пользователя."""
     print("\nРасчет потребности в кормах")
     print("~" * 30)
@@ -70,28 +70,28 @@ def show_menu() -> str:
         print("Ошибка: введите число от 0 до 9. -_-")
 
 
-def input_one_animal() -> Animal:
+def inputOneAnimal() -> Animal:
     """Запрашивает данные по одному виду животных."""
     species = input("Вид животного (например, корова): ").strip()
-    daily_rate = input_float("Суточная норма корма на 1 голову (кг): ", min_value=0.01)
-    count = input_int("Поголовье (шт.): ", min_value=1)
+    daily_rate = inputFloat("Суточная норма корма на 1 голову (кг): ", min_value=0.01)
+    count = inputInt("Поголовье (шт.): ", min_value=1)
     return Animal(species=species, daily_rate=daily_rate, count=count)
 
 
-def input_animals_batch() -> list[Animal]:
+def inputAnimalsBatch() -> list[Animal]:
     """Пакетный ввод нескольких видов животных подряд."""
     animals: list[Animal] = []
-    count_species = input_int("Сколько видов животных добавить? ")
+    count_species = inputInt("Сколько видов животных добавить? ")
 
     for i in range(count_species):
         print(f"\n~~~ Животное #{i + 1} из {count_species} ~~~")
-        animals.append(input_one_animal())
+        animals.append(inputOneAnimal())
 
     print(f"\n[OK] Успешно добавлено видов: {len(animals)}")
     return animals
 
 
-def show_animals(animals: list[Animal]) -> None:
+def showAnimals(animals: list[Animal]) -> None:
     """Выводит текущий список животных."""
     if not animals:
         print("\nСписок животных пуст. -_-")
@@ -105,14 +105,14 @@ def show_animals(animals: list[Animal]) -> None:
     print("~" * 50)
 
 
-def delete_animal(animals: list[Animal]) -> None:
+def deleteAnimal(animals: list[Animal]) -> None:
     """Удаляет вид животных из списка по номеру."""
     if not animals:
         print("\nСписок животных пуст, удалять нечего. -_-")
         return
 
-    show_animals(animals)
-    index = input_int(f"Введите номер для удаления (1-{len(animals)}): ", min_value=1)
+    showAnimals(animals)
+    index = inputInt(f"Введите номер для удаления (1-{len(animals)}): ", min_value=1)
 
     if index > len(animals):
         print("Ошибка: такого номера нет в списке. :(")
@@ -122,7 +122,7 @@ def delete_animal(animals: list[Animal]) -> None:
     print(f"[OK] Удалено: {removed.species}")
 
 
-def save_animals(animals: list[Animal], filename: str = DATA_FILE) -> None:
+def saveAnimals(animals: list[Animal], filename: str = DATA_FILE) -> None:
     """Сохраняет список животных в JSON-файл."""
     data = [asdict(a) for a in animals]
     with open(filename, "w", encoding="utf-8") as f:
@@ -130,7 +130,7 @@ def save_animals(animals: list[Animal], filename: str = DATA_FILE) -> None:
     print(f"[OK] Данные сохранены в файл '{filename}'.")
 
 
-def load_animals(filename: str = DATA_FILE) -> list[Animal]:
+def loadAnimals(filename: str = DATA_FILE) -> list[Animal]:
     """Загружает список животных из JSON-файла, если он существует."""
     if not os.path.exists(filename):
         print(f"Файл '{filename}' не найден. -_-")
@@ -144,7 +144,7 @@ def load_animals(filename: str = DATA_FILE) -> list[Animal]:
     return animals
 
 
-def calculate_total_feed(animals: list[Animal], days: int) -> dict[str, float]:
+def calculateTotalFeed(animals: list[Animal], days: int) -> dict[str, float]:
     """Рассчитывает потребность в кормах за период для каждого вида животных."""
     result: dict[str, float] = {}
     for animal in animals:
@@ -153,7 +153,7 @@ def calculate_total_feed(animals: list[Animal], days: int) -> dict[str, float]:
     return result
 
 
-def print_results(result: dict[str, float], days: int) -> None:
+def printResults(result: dict[str, float], days: int) -> None:
     """Выводит итоговый отчет по потребности в кормах."""
     print(f"\nПотребность в кормах за {days} дн.:")
     print("~" * 40)
@@ -167,7 +167,7 @@ def print_results(result: dict[str, float], days: int) -> None:
     print(f"{'ИТОГО по ферме:':<20} {total_all:>10.2f} кг")
 
 
-def save_report(result: dict[str, float], days: int) -> None:
+def saveReport(result: dict[str, float], days: int) -> None:
     """Сохраняет итоговый отчет по кормам в текстовый файл."""
     filename = input("Введите имя файла для отчета (например, report.txt): ").strip()
     if not filename:
@@ -184,7 +184,7 @@ def save_report(result: dict[str, float], days: int) -> None:
     print(f"[OK] Отчет сохранен в файл '{filename}'.")
 
 
-def show_help() -> None:
+def showHelp() -> None:
     """Выводит справку по программе."""
     print("\n" + "~" * 50)
     print("СПРАВКА ПО ПРОГРАММЕ")
@@ -207,7 +207,7 @@ def main():
     last_days: int | None = None
 
     while True:
-        choice = show_menu()
+        choice = showMenu()
 
         if choice == "0":
             print("\nПрограмма завершена. ^_^")
@@ -215,38 +215,38 @@ def main():
 
         elif choice == "1":
             print("\n<~~ ДОБАВЛЕНИЕ ОДНОГО ВИДА ЖИВОТНЫХ ~~>")
-            animals.append(input_one_animal())
+            animals.append(inputOneAnimal())
             print("[OK] Вид животных добавлен.")
 
         elif choice == "2":
             print("\n<~~ ПАКЕТНЫЙ ВВОД ЖИВОТНЫХ ~~>")
-            animals.extend(input_animals_batch())
+            animals.extend(inputAnimalsBatch())
 
         elif choice == "3":
-            show_animals(animals)
+            showAnimals(animals)
 
         elif choice == "4":
-            delete_animal(animals)
+            deleteAnimal(animals)
 
         elif choice == "5":
             if not animals:
                 print("\nСначала добавьте хотя бы один вид животных. -_-")
                 continue
-            days = input_int("\nНа сколько дней рассчитать корма? ")
-            last_result = calculate_total_feed(animals, days)
+            days = inputInt("\nНа сколько дней рассчитать корма? ")
+            last_result = calculateTotalFeed(animals, days)
             last_days = days
-            print_results(last_result, last_days)
+            printResults(last_result, last_days)
 
         elif choice == "6":
             if not animals:
                 print("\nСписок животных пуст, нечего сохранять. -_-")
                 continue
-            save_animals(animals)
+            saveAnimals(animals)
 
         elif choice == "7":
-            loaded = load_animals()
+            loaded = loadAnimals()
             if loaded:
-                if input_yes_no("Заменить текущий список загруженным? (д/н): "):
+                if inputYesNo("Заменить текущий список загруженным? (д/н): "):
                     animals = loaded
                 else:
                     animals.extend(loaded)
@@ -255,10 +255,10 @@ def main():
             if last_result is None:
                 print("\nСначала выполните расчет (пункт 5), а потом сохраняйте отчет. -_-")
             else:
-                save_report(last_result, last_days)
+                saveReport(last_result, last_days)
 
         elif choice == "9":
-            show_help()
+            showHelp()
 
         input("\nНажмите Enter для продолжения...")
 
