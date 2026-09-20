@@ -1,13 +1,15 @@
 import json
 import os
 from dataclasses import dataclass, asdict
-DATA_FILE="animal.json"
+
+DATA_FILE = "animal.json"
 
 @dataclass
 class Animal:
     species: str        # вид животного
     daily_rate: float   # суточная норма корма на одну голову (кг)
     count: int          # общее поголовье
+
 
 def input_int(prompt: str, min_value: int = 1) -> int:
     """Запрашивает целое число с проверкой корректности ввода."""
@@ -21,6 +23,7 @@ def input_int(prompt: str, min_value: int = 1) -> int:
         except ValueError:
             print("Ошибка: введите целое число.")
 
+
 def input_float(prompt: str, min_value: float = 0.0) -> float:
     """Запрашивает вещественное число с проверкой корректности ввода."""
     while True:
@@ -33,140 +36,231 @@ def input_float(prompt: str, min_value: float = 0.0) -> float:
         except ValueError:
             print("Ошибка: введите число (можно с точкой, например 2.5).")
 
+
 def input_yes_no(prompt: str) -> bool:
     """Запрашивает ответ да/нет с проверкой корректности ввода."""
     while True:
         answer = input(prompt).strip().lower()
-        if answer in ("д", "да", "y", "yes", "оа", "ооба"):
+        if answer in ("д", "да", "y", "yes", "ооба", "оба"):
             return True
-        elif answer in ("н", "нет", "n", "no", "ж", "жок"):
+        elif answer in ("н", "нет", "n", "no", "жок"):
             return False
         else:
-            print("Ошибка: введите 'д' (да) или 'н' (нет).")
+            print("Ошибка: введите 'д'/'да'/'ооба' (да) или 'н'/'нет'/'жок' (нет).")
+
 
 def show_menu() -> str:
     """Показывает главное меню и возвращает выбор пользователя."""
-    print("Меню")
-    print("1. Добавить виды животных и рассчитать корма")
-    print("2. Выход")
+    print("\nРасчет потребности в кормах")
+    print("~" * 30)
+    print("1. Добавить один вид животных")
+    print("2. Пакетный ввод нескольких видов")
+    print("3. Показать список животных")
+    print("4. Удалить вид животных")
+    print("5. Рассчитать потребность в кормах")
+    print("6. Сохранить список животных в файл")
+    print("7. Загрузить список животных из файла")
+    print("8. Сохранить отчет в файл")
+    print("9. Справка")
+    print("0. Выход")
     while True:
-        choice = input("Выберите пункт меню (1-2): ").strip()
-        if choice in ("1", "2"):
+        choice = input("Выберите пункт меню: ").strip()
+        if choice in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
             return choice
-        print("Ошибка: введите 1 или 2.")
+        print("Ошибка: введите число от 0 до 9. -_-")
 
-def input_animals() -> list[Animal]:
-    """Запрашивает у пользователя данные по видам животных."""
+
+def input_one_animal() -> Animal:
+    """Запрашивает данные по одному виду животных."""
+    species = input("Вид животного (например, корова): ").strip()
+    daily_rate = input_float("Суточная норма корма на 1 голову (кг): ", min_value=0.01)
+    count = input_int("Поголовье (шт.): ", min_value=1)
+    return Animal(species=species, daily_rate=daily_rate, count=count)
+
+
+def input_animals_batch() -> list[Animal]:
+    """Пакетный ввод нескольких видов животных подряд."""
     animals: list[Animal] = []
-    count_species = input_int("Сколько видов животных нужно ввести? ")
+    count_species = input_int("Сколько видов животных добавить? ")
 
     for i in range(count_species):
-        print(f"\n--- Животное #{i + 1} ---")
-        species = input("Вид животного (например, корова): ").strip()
-        daily_rate = input_float("Суточная норма корма на 1 голову (кг): ", min_value=0.01)
-        count = input_int("Поголовье (шт.): ", min_value=1)
+        print(f"\n~~~ Животное #{i + 1} из {count_species} ~~~")
+        animals.append(input_one_animal())
 
-        animals.append(Animal(species=species, daily_rate=daily_rate, count=count))
-
+    print(f"\n[OK] Успешно добавлено видов: {len(animals)}")
     return animals
+
+
+def show_animals(animals: list[Animal]) -> None:
+    """Выводит текущий список животных."""
+    if not animals:
+        print("\nСписок животных пуст. -_-")
+        return
+
+    print("\n" + "~" * 50)
+    print(f"{'№':<4}{'Вид':<20}{'Норма/гол (кг)':<18}{'Поголовье':<10}")
+    print("~" * 50)
+    for i, a in enumerate(animals, start=1):
+        print(f"{i:<4}{a.species:<20}{a.daily_rate:<18}{a.count:<10}")
+    print("~" * 50)
+
+
+def delete_animal(animals: list[Animal]) -> None:
+    """Удаляет вид животных из списка по номеру."""
+    if not animals:
+        print("\nСписок животных пуст, удалять нечего. -_-")
+        return
+
+    show_animals(animals)
+    index = input_int(f"Введите номер для удаления (1-{len(animals)}): ", min_value=1)
+
+    if index > len(animals):
+        print("Ошибка: такого номера нет в списке. :(")
+        return
+
+    removed = animals.pop(index - 1)
+    print(f"[OK] Удалено: {removed.species}")
+
 
 def save_animals(animals: list[Animal], filename: str = DATA_FILE) -> None:
     """Сохраняет список животных в JSON-файл."""
     data = [asdict(a) for a in animals]
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"Данные сохранены в файл '{filename}'.")
+    print(f"[OK] Данные сохранены в файл '{filename}'.")
 
 
 def load_animals(filename: str = DATA_FILE) -> list[Animal]:
     """Загружает список животных из JSON-файла, если он существует."""
     if not os.path.exists(filename):
-        print(f"Файл '{filename}' не найден. Начинаем с пустого списка.")
+        print(f"Файл '{filename}' не найден. -_-")
         return []
 
     with open(filename, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     animals = [Animal(**item) for item in data]
-    print(f"Загружено видов животных: {len(animals)}.")
+    print(f"[OK] Загружено видов животных: {len(animals)}.")
     return animals
 
-
-def save_report(result: dict[str, float], days: int) -> None:
-    """Сохраняет итоговый отчет по кормам в текстовый файл."""
-    filename=input("Введите имя файла для отчета (например, report.txt): ").strip()
-    if not filename:
-        filename = "feed_report.txt"
-
-    total_all = sum(result.values())
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"Потребность в кормах за {days} дн.\n")
-        f.write("=" * 40 + "\n")
-        for species, total in result.items():
-            f.write(f"{species:<20} {total:>10.2f} кг\n")
-        f.write("-" * 40 + "\n")
-        f.write(f"{'ИТОГО по ферме:':<20} {total_all:>10.2f} кг\n")
-    print(f"Отчет сохранен в файл '{filename}'.")
 
 def calculate_total_feed(animals: list[Animal], days: int) -> dict[str, float]:
     """Рассчитывает потребность в кормах за период для каждого вида животных."""
     result: dict[str, float] = {}
     for animal in animals:
         total_for_species = animal.daily_rate * animal.count * days
-        # если один и тот же вид введен несколько раз - суммируем
         result[animal.species] = result.get(animal.species, 0.0) + total_for_species
     return result
 
+
 def print_results(result: dict[str, float], days: int) -> None:
     """Выводит итоговый отчет по потребности в кормах."""
-    print("\n" + "=" * 40)
-    print(f"ПОТРЕБНОСТЬ В КОРМАХ ЗА {days} ДН.")
-    print("=" * 40)
+    print(f"\nПотребность в кормах за {days} дн.:")
+    print("~" * 40)
 
     total_all = 0.0
     for species, total in result.items():
         print(f"{species:<20} {total:>10.2f} кг")
         total_all += total
 
-    print("-" * 40)
+    print("~" * 40)
     print(f"{'ИТОГО по ферме:':<20} {total_all:>10.2f} кг")
-    print("=" * 40)
-    
+
+
+def save_report(result: dict[str, float], days: int) -> None:
+    """Сохраняет итоговый отчет по кормам в текстовый файл."""
+    filename = input("Введите имя файла для отчета (например, report.txt): ").strip()
+    if not filename:
+        filename = "feed_report.txt"
+
+    total_all = sum(result.values())
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(f"Потребность в кормах за {days} дн.\n")
+        f.write("~" * 40 + "\n")
+        for species, total in result.items():
+            f.write(f"{species:<20} {total:>10.2f} кг\n")
+        f.write("~" * 40 + "\n")
+        f.write(f"{'ИТОГО по ферме:':<20} {total_all:>10.2f} кг\n")
+    print(f"[OK] Отчет сохранен в файл '{filename}'.")
+
+
+def show_help() -> None:
+    """Выводит справку по программе."""
+    print("\n" + "~" * 50)
+    print("СПРАВКА ПО ПРОГРАММЕ")
+    print("~" * 50)
+    print("Программа рассчитывает потребность в кормах на ферме.")
+    print("Для каждого вида животных хранятся: название, суточная")
+    print("норма корма на голову (кг) и поголовье.")
+    print()
+    print("Формула расчета:")
+    print("  Total = норма_i * поголовье_i * дни, для каждого вида i")
+    print()
+    print("Пример:")
+    print("  10 коров по 25 кг/сут на 7 дней => 1750 кг.")
+    print("~" * 50)
+
+
 def main():
-    print("Расчет потребности в кормах на ферме\n")
-
     animals: list[Animal] = []
-
-    # Загрузка сохраненных данных один раз при старте
-    if os.path.exists(DATA_FILE):
-        if input_yes_no(f"Найден файл '{DATA_FILE}'. Загрузить сохраненные данные? (д/н): "):
-            animals = load_animals()
+    last_result: dict[str, float] | None = None
+    last_days: int | None = None
 
     while True:
         choice = show_menu()
 
-        if choice == "2":
-            print("\nПрограмма завершена.")
+        if choice == "0":
+            print("\nПрограмма завершена. ^_^")
             break
 
-        # choice == "1"
-        if input_yes_no("\nДобавить новые виды животных? (д/н): ") or not animals:
-            animals.extend(input_animals())
+        elif choice == "1":
+            print("\n<~~ ДОБАВЛЕНИЕ ОДНОГО ВИДА ЖИВОТНЫХ ~~>")
+            animals.append(input_one_animal())
+            print("[OK] Вид животных добавлен.")
 
-        if not animals:
-            print("Нет данных о животных.")
-            continue
+        elif choice == "2":
+            print("\n<~~ ПАКЕТНЫЙ ВВОД ЖИВОТНЫХ ~~>")
+            animals.extend(input_animals_batch())
 
-        if input_yes_no("\nСохранить список животных в файл? (д/н): "):
+        elif choice == "3":
+            show_animals(animals)
+
+        elif choice == "4":
+            delete_animal(animals)
+
+        elif choice == "5":
+            if not animals:
+                print("\nСначала добавьте хотя бы один вид животных. -_-")
+                continue
+            days = input_int("\nНа сколько дней рассчитать корма? ")
+            last_result = calculate_total_feed(animals, days)
+            last_days = days
+            print_results(last_result, last_days)
+
+        elif choice == "6":
+            if not animals:
+                print("\nСписок животных пуст, нечего сохранять. -_-")
+                continue
             save_animals(animals)
 
-        days = input_int("\nНа сколько дней рассчитать корма? ")
+        elif choice == "7":
+            loaded = load_animals()
+            if loaded:
+                if input_yes_no("Заменить текущий список загруженным? (д/н): "):
+                    animals = loaded
+                else:
+                    animals.extend(loaded)
 
-        result = calculate_total_feed(animals, days)
-        print_results(result, days)
+        elif choice == "8":
+            if last_result is None:
+                print("\nСначала выполните расчет (пункт 5), а потом сохраняйте отчет. -_-")
+            else:
+                save_report(last_result, last_days)
 
-        if input_yes_no("\nСохранить отчет в файл? (д/н): "):
-            save_report(result, days)
+        elif choice == "9":
+            show_help()
+
+        input("\nНажмите Enter для продолжения...")
 
 
 if __name__ == "__main__":
